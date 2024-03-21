@@ -9,24 +9,12 @@ pipeline {
             steps {
                 sh 'mvn clean package'
             }
-            post {
-                success {
-                    echo 'Now Archiving...'
-                    archiveArtifacts artifacts: '**/target/*.jar'
-                }
-            }
         }
-        stage('Build Docker image') {
-
-            steps {
-                sh 'docker build -t petclinic:latest .'
-            }
-            post {
-                success {
-                    echo 'Docker image built'
-                }
-            }
-        }
+//         stage('Build Docker image') {
+//             steps {
+//                 sh 'docker build -t petclinic:latest .'
+//             }
+//         }
 
 //         stage('Deploy to EC2') {
 //             steps {
