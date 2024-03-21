@@ -8,36 +8,38 @@ pipeline {
     stages {
         stage('build') {
             steps {
-                sh 'mvn clean install'
+                sh 'mvn clean package'
             }
+            post {
+                            success {
+                                echo 'Now Archiving...'
+                                archiveArtifacts artifacts: '**/target/*.jar'
+                            }
+                        }
         }
-        stage('Build Docker Image') {
-            agent {
-                docker {
-                    image 'gradle:8.2.0-jdk17-alpine'
-                    // Run the container on the node specified at the
-                    // top-level of the Pipeline, in the same workspace,
-                    // rather than on a new node entirely:
-                    reuseNode true
-                }
-            }
-            steps {
-                sh 'gradle --version'
-            }
-//                         steps {
-//                 sh 'docker build -t petclinic:latest .'
-//             }
-        }
-        stage('Deploy to EC2') {
-            steps {
-                script {
-                    echo 'Deploying docker image to EC2'
-                    def dockerCmd = "docker run -p 8888:8888 -d petclinic:latest"
-                    sshagent(['ubuntu']) {
-                        sh "ssh -o StrictHostKeyChecking=no ubuntu@13.39.16.220 ${dockerCmd}"
+        stage('Deliver') {
+                    steps {
+                        script {
+                            // Find the latest JAR file in the target directory
+                            def latestJar = sh(script: 'ls -t target/*.jar | head -n 1', returnStdout: true).trim()
+                            // Copy the latest JAR file to the EC2 instance
+                            sh "scp -v -o StrictHostKeyChecking=no ${latestJar} ubuntu@13.39.16.220:/home/ubuntu"
+                            // Run the JAR file on the EC2 instance
+                            sh "sshpass ssh -o StrictHostKeyChecking=no ubuntu@13.39.16.220 'nohup java -jar /home/ubuntu/${latestJar} > /home/ubuntu/log.txt 2>&1 & echo \$! > /home/ubuntu/pid.file'"
+                        }
                     }
                 }
-            }
-        }
+
+//         stage('Deploy to EC2') {
+//             steps {
+//                 script {
+//                     echo 'Deploying docker image to EC2'
+//                     def dockerCmd = "docker run -p 8888:8888 -d petclinic:latest"
+//                     sshagent(['ubuntu']) {
+//                         sh "ssh -o StrictHostKeyChecking=no ubuntu@13.39.16.220 ${dockerCmd}"
+//                     }
+//                 }
+//             }
+//         }
     }
 }
