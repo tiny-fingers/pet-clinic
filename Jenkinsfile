@@ -20,17 +20,15 @@ pipeline {
                 }
             }
         }
-
-//         stage('Deploy to EC2') {
-//             steps {
-//                 script {
-//                     echo 'Deploying docker image to EC2'
-//                     def dockerCmd = "docker run -p 8888:8888 -d petclinic:latest"
-//                     sshagent(['ubuntu']) {
-//                         sh "ssh -o StrictHostKeyChecking=no ubuntu@13.39.16.220 ${dockerCmd}"
-//                     }
-//                 }
-//             }
-//         }
+        stage('Run Docker image') {
+            steps {
+                sh 'docker -p 80:8090 --name pet-clinic -d run petclinic:latest'
+            }
+            post {
+                success {
+                    echo 'Docker image deployed'
+                }
+            }
+        }
     }
 }
