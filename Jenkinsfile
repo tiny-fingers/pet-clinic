@@ -7,5 +7,11 @@ pipeline {
       }
     }
 
+    stage('Run mvn package') {
+      steps {
+        sh 'mvn run package'
+      }
+    }
+
   }
 }
