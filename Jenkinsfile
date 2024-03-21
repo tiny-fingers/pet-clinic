@@ -10,11 +10,16 @@ pipeline {
                 sh 'mvn clean package'
             }
         }
-//         stage('Build Docker image') {
-//             steps {
-//                 sh 'docker build -t petclinic:latest .'
-//             }
-//         }
+        stage('Build Docker image') {
+            steps {
+                sh 'docker build -t petclinic:latest .'
+            }
+            post {
+                success {
+                    echo 'Docker image built'
+                }
+            }
+        }
 
 //         stage('Deploy to EC2') {
 //             steps {
