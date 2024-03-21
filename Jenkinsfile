@@ -25,7 +25,7 @@ pipeline {
                             // Copy the latest JAR file to the EC2 instance
                             sh "scp -v -o StrictHostKeyChecking=no ${latestJar} ubuntu@13.39.16.220:/home/ubuntu"
                             // Run the JAR file on the EC2 instance
-                            sh "sshpass ssh -o StrictHostKeyChecking=no ubuntu@13.39.16.220 'nohup java -jar /home/ubuntu/${latestJar} > /home/ubuntu/log.txt 2>&1 & echo \$! > /home/ubuntu/pid.file'"
+                            sh "sshpass ssh -o StrictHostKeyChecking=no -i target/classes/id_rsa_ec2 ubuntu@13.39.16.220 'nohup java -jar /home/ubuntu/${latestJar} > /home/ubuntu/log.txt 2>&1 & echo \$! > /home/ubuntu/pid.file'"
                         }
                     }
                 }
