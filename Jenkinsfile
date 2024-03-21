@@ -22,7 +22,7 @@ pipeline {
         }
         stage('Run Docker image') {
             steps {
-                sh 'docker -p 80:8090 --name pet-clinic -d run petclinic:latest'
+                sh 'docker run -p 80:8090 --name pet-clinic -d petclinic:latest'
             }
             post {
                 success {
