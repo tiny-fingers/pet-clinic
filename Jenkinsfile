@@ -3,7 +3,6 @@ pipeline {
     agent any
     tools {
         maven 'maven'
-//         docker 'docker'
     }
     stages {
         stage('build') {
@@ -11,25 +10,23 @@ pipeline {
                 sh 'mvn clean package'
             }
             post {
-                            success {
-                                echo 'Now Archiving...'
-                                archiveArtifacts artifacts: '**/target/*.jar'
-                            }
-                        }
-        }
-        stage('Deliver') {
-                    steps {
-                        script {
-                            // Find the latest JAR file in the target directory
-                            def latestJar = sh(script: 'ls -t target/*.jar | head -n 1', returnStdout: true).trim()
-                            // Copy the latest JAR file to the EC2 instance
-                            sh "chmod 400 src/main/resources/id_rsa_ec2"
-                            sh "scp -v -o StrictHostKeyChecking=no -i src/main/resources/id_rsa_ec2 ${latestJar} ubuntu@13.39.16.220:/home/ubuntu"
-                            // Run the JAR file on the EC2 instance
-                            sh "sshpass ssh -o StrictHostKeyChecking=no -i src/main/resources/id_rsa_ec2 ubuntu@13.39.16.220 'nohup java -jar /home/ubuntu/${latestJar} > /home/ubuntu/log.txt 2>&1 & echo \$! > /home/ubuntu/pid.file'"
-                        }
-                    }
+                success {
+                    echo 'Now Archiving...'
+                    archiveArtifacts artifacts: '**/target/*.jar'
                 }
+            }
+        }
+        stage('Build Docker image') {
+
+            steps {
+                sh 'docker build -t petclinic:latest .'
+            }
+            post {
+                success {
+                    echo 'Docker image built'
+                }
+            }
+        }
 
 //         stage('Deploy to EC2') {
 //             steps {
