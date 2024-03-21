@@ -26,7 +26,7 @@ pipeline {
             }
 //                         steps {
 //                 sh 'docker build -t petclinic:latest .'
-            }
+//             }
         }
         stage('Deploy to EC2') {
             steps {
